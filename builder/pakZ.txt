@@ -1,2 +1,2 @@
-# Make sure use Numpy 1
-numpy==1.26.4
+# Make sure to use Numpy version 1
+# numpy==1.26.4
