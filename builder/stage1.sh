@@ -62,28 +62,24 @@ $pip_exe install -r https://github.com/comfyanonymous/ComfyUI/raw/refs/heads/mas
 $pip_exe install -r "$workdir"/pakY.txt
 # 使用 pip 安装 pakY.txt 文件中列出的依赖
 $pip_exe install -r "$workdir"/pakZ.txt
-# 使用 pip 安装 pakZ.txt 文件中列出的依赖
+
+$pip_exe list
+# 列出所有已安装的 pip 包
 
 # 验证 PyTorch 安装
 $pip_exe list | grep torch  # 应显示 torch 2.3.0+cu121
 
-
 # 克隆 APEX 仓库
 git clone https://github.com/NVIDIA/apex.git "$workdir"/apex
-
 cd "$workdir"/apex
-# 切换到 apex 目录
 
 $pip_exe install -v --disable-pip-version-check --no-cache-dir \
   --global-option="--cpp_ext" --global-option="--cuda_ext" ./
-# 使用 pip 安装 apex
-cd "$workdir"
-# 切换回工作目录
-rm -rf "$workdir"/apex
-# 删除 apex 目录以清理空间
 
-$pip_exe list
-# 列出所有已安装的 pip 包
+cd "$workdir"
+rm -rf "$workdir"/apex
+
+
 
 cd "$workdir"
 # 切换到工作目录
