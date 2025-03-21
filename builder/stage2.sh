@@ -1,48 +1,44 @@
 #!/bin/bash
-set -eux
+set -eux  # 开启调试模式，显示每条命令并在出错时退出
 
-# Chores
+# 配置 Git 全局设置
 git config --global core.autocrlf true
-workdir=$(pwd)
-gcs='git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules'
-export PYTHONPYCACHEPREFIX="$workdir/pycache2"
-export PATH="$PATH:$workdir/ComfyUI_Windows_portable/python_standalone/Scripts"
+workdir=$(pwd)  # 获取当前工作目录
+gcs='git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules'  # 定义简化的 git clone 命令
+export PYTHONPYCACHEPREFIX="$workdir/pycache2"  # 设置 Python 缓存目录
+export PATH="$PATH:$workdir/ComfyUI_Windows_portable/python_standalone/Scripts"  # 添加 Python 脚本路径到环境变量
 
-ls -lahF
+ls -lahF  # 列出当前目录的文件和文件夹
 
-# Redirect HuggingFace-Hub model folder
+# 配置 HuggingFace-Hub 和 Pytorch Hub 的缓存目录
 export HF_HUB_CACHE="$workdir/ComfyUI_Windows_portable/HuggingFaceHub"
 mkdir -p "${HF_HUB_CACHE}"
-# Redirect Pytorch Hub model folder
 export TORCH_HOME="$workdir/ComfyUI_Windows_portable/TorchHome"
 mkdir -p "${TORCH_HOME}"
 
-# Relocate python_standalone
-# This move is intentional. It will fast-fail if this breaks anything.
+# 移动 python_standalone 到目标目录
 mv  "$workdir"/python_standalone  "$workdir"/ComfyUI_Windows_portable/python_standalone
 
-# Add MinGit (Portable Git)
+# 下载并解压 MinGit（便携版 Git）
 curl -sSL https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/MinGit-2.49.0-64-bit.zip \
     -o MinGit.zip
 unzip -q MinGit.zip -d "$workdir"/ComfyUI_Windows_portable/MinGit
 rm MinGit.zip
 
 ################################################################################
-# ComfyUI main app
+# 克隆 ComfyUI 主应用
 git clone https://github.com/comfyanonymous/ComfyUI.git \
     "$workdir"/ComfyUI_Windows_portable/ComfyUI
-# Use latest stable version (has a release tag)
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI
-git reset --hard "$(git tag | grep -e '^v' | sort -V | tail -1)"
-# Clear models folder (will restore in the next stage)
-rm -vrf models
-mkdir models
+git reset --hard "$(git tag | grep -e '^v' | sort -V | tail -1)"  # 切换到最新稳定版本
+rm -vrf models  # 清空 models 文件夹
+mkdir models  # 重新创建 models 文件夹
 
-# Custom Nodes
+# 克隆自定义节点
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes
 $gcs https://github.com/ltdrdata/ComfyUI-Manager.git
 
-# Workspace
+# 克隆其他节点分类（工作区、通用、控制、视频等）
 $gcs https://github.com/crystian/ComfyUI-Crystools.git
 $gcs https://github.com/pydn/ComfyUI-to-Python-Extension.git
 
@@ -102,14 +98,14 @@ $gcs https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
 $gcs https://github.com/CY-CHENYUE/ComfyUI-Janus-Pro.git
 
 ################################################################################
-# Copy attachments files (incl. start scripts)
+# 复制附件文件（包括启动脚本）
 cp -rf "$workdir"/attachments/. \
     "$workdir"/ComfyUI_Windows_portable/
 
-du -hd2 "$workdir"/ComfyUI_Windows_portable
+du -hd2 "$workdir"/ComfyUI_Windows_portable  # 显示目录大小
 
 ################################################################################
-# TAESD model for image on-the-fly preview
+# 下载 TAESD 模型，用于实时预览
 cd "$workdir"
 $gcs https://github.com/madebyollin/taesd.git
 mkdir -p "$workdir"/ComfyUI_Windows_portable/ComfyUI/models/vae_approx
@@ -117,7 +113,7 @@ cp taesd/*_decoder.pth \
     "$workdir"/ComfyUI_Windows_portable/ComfyUI/models/vae_approx/
 rm -rf taesd
 
-# Download models for ReActor
+# 下载 ReActor 所需模型
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/models
 curl -sSL https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth \
     --create-dirs -o facerestore_models/codeformer-v0.1.0.pth
@@ -134,21 +130,19 @@ curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/mo
 curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/preprocessor_config.json \
     --create-dirs -o nsfw_detector/vit-base-nsfw-detector/preprocessor_config.json
 
-# Download models for Impact-Pack & Impact-Subpack
+# 安装 Impact-Pack 和 Impact-Subpack 的依赖
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Subpack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
 
 ################################################################################
-# Run the test (CPU only), also let custom nodes download some models
+# 运行测试（仅使用 CPU），并让自定义节点下载所需模型
 cd "$workdir"/ComfyUI_Windows_portable
 ./python_standalone/python.exe -s -B ComfyUI/main.py --quick-test-for-ci --cpu
 
 ################################################################################
-# Clean up
-# DO NOT clean pymatting cache, they are nbi/nbc files for Numba, and won't be regenerated.
-#rm -rf "$workdir"/ComfyUI_Windows_portable/python_standalone/Lib/site-packages/pymatting
+# 清理临时文件和日志
 rm -vf "$workdir"/ComfyUI_Windows_portable/*.log
 rm -vf "$workdir"/ComfyUI_Windows_portable/ComfyUI/user/*.log
 rm -vrf "$workdir"/ComfyUI_Windows_portable/ComfyUI/user/default/ComfyUI-Manager
@@ -160,8 +154,9 @@ rm -vf ./ComfyUI-Impact-Pack/impact-pack.ini
 rm -vf ./Jovimetrix/web/config.json
 rm -vf ./was-node-suite-comfyui/was_suite_config.json
 
+# 重置 ComfyUI-Manager 的状态
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Manager
 git reset --hard
 git clean -fxd
 
-cd "$workdir"
+cd "$workdir"  # 返回工作目录
