@@ -73,12 +73,12 @@ $pip_exe list | grep torch  # 应显示 torch 2.3.0+cu121
 git clone https://github.com/NVIDIA/apex.git "$workdir"/apex
 cd "$workdir"/apex
 
-$pip_exe install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext"
-
+$pip_exe install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
+  --config-settings="--build-option=--cpp_ext" \
+  --config-settings="--build-option=--cuda_ext" .
+  
 cd "$workdir"
 rm -rf "$workdir"/apex
-
-
 
 cd "$workdir"
 # 切换到工作目录
