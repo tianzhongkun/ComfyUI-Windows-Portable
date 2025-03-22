@@ -99,8 +99,7 @@ $gcs https://github.com/CY-CHENYUE/ComfyUI-Janus-Pro.git
 
 #汉化插件
 $gcs https://github.com/AIGODLIKE/AIGODLIKE-ComfyUI-Translation.git
-#人像大师
-$gcs https://github.com/florestefano1975/comfyui-portrait-master.git
+
 #comfyui-mixlab-nodes
 $gcs https://github.com/shadowcz007/comfyui-mixlab-nodes.git
 
