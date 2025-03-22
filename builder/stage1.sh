@@ -27,37 +27,37 @@ https://github.com/astral-sh/python-build-standalone/releases/download/20250317/
     -o python.tar.gz
 # 使用 curl 下载 Python 独立版本的压缩包，保存为 python.tar.gz
 tar -zxf python.tar.gz
-# 解压 python.tar.gz 文件
+echo "Python Standalone 解压完成"
 mv python python_standalone
-# 将解压后的 python 目录重命名为 python_standalone
+echo "Python Standalone 重命名完成"
 
 # PIP installs
 $pip_exe install --upgrade pip wheel setuptools
-# 使用 pip 升级 pip、wheel 和 setuptools
+echo "pip、wheel 和 setuptools 升级完成"
 
 $pip_exe install -r "$workdir"/pak2.txt
-# 使用 pip 安装 pak2.txt 文件中列出的依赖
+echo "pak2.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak3.txt
-# 使用 pip 安装 pak3.txt 文件中列出的依赖
+echo "pak3.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak4.txt
-# 使用 pip 安装 pak4.txt 文件中列出的依赖
+echo "pak4.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak5.txt
-# 使用 pip 安装 pak5.txt 文件中列出的依赖
+echo "pak5.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak6.txt
-# 使用 pip 安装 pak6.txt 文件中列出的依赖
+echo "pak6.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak7.txt
-# 使用 pip 安装 pak7.txt 文件中列出的依赖
+echo "pak7.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak8.txt
-# 使用 pip 安装 pak8.txt 文件中列出的依赖
+echo "pak8.txt 依赖安装完成"
 
 # Tweak for transparent-background. TODO: remove if upstream updated.
 # https://github.com/plemeri/transparent-background/blob/f54975ce489af549dcfc4dc0a2d39e8f69a204fd/setup.py#L45
 $pip_exe install --upgrade albucore albumentations
-# 升级 albucore 和 albumentations 包，用于透明背景功能的调整
+echo "albucore 和 albumentations 升级完成"
 
 # Install comfyui-frontend-package, version determined by ComfyUI.
 $pip_exe install -r https://github.com/comfyanonymous/ComfyUI/raw/refs/heads/master/requirements.txt
-# 从 ComfyUI 的 requirements.txt 文件安装依赖
+echo "ComfyUI 前端依赖安装完成"
 
 $pip_exe install -r "$workdir"/pakY.txt
 # 使用 pip 安装 pakY.txt 文件中列出的依赖
@@ -68,17 +68,8 @@ $pip_exe list
 
 # 验证 PyTorch 安装
 $pip_exe list | grep torch  # 应显示 torch 2.3.0+cu121
+echo "PyTorch 安装验证完成"
 
-# 克隆 APEX 仓库
-git clone https://github.com/NVIDIA/apex.git "$workdir"/apex
-cd "$workdir"/apex
-
-$pip_exe install -v --disable-pip-version-check --no-cache-dir --no-build-isolation \
-  --config-settings="--build-option=--cpp_ext" \
-  --config-settings="--build-option=--cuda_ext" .
-  
-cd "$workdir"
-rm -rf "$workdir"/apex
 
 cd "$workdir"
 # 切换到工作目录
@@ -90,7 +81,7 @@ curl -sSL https://github.com/ninja-build/ninja/releases/latest/download/ninja-wi
 unzip -q -o ninja-win.zip -d "$workdir"/python_standalone/Scripts
 # 解压 ninja-win.zip 到 python_standalone/Scripts 目录，-q 静默模式，-o 覆盖已存在的文件
 rm ninja-win.zip
-# 删除 ninja-win.zip 文件
+echo "Ninja 构建工具安装完成"
 
 # Add aria2 binary
 curl -sSL https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip \
@@ -99,7 +90,7 @@ curl -sSL https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-
 unzip -q aria2.zip -d "$workdir"/aria2
 # 解压 aria2.zip 到 aria2 目录
 mv "$workdir"/aria2/*/aria2c.exe  "$workdir"/python_standalone/Scripts/
-# 将 aria2c.exe 移动到 python_standalone/Scripts 目录
+echo "aria2 下载工具安装完成"
 rm aria2.zip
 # 删除 aria2.zip 文件
 
@@ -110,11 +101,11 @@ curl -sSL https://github.com/GyanD/codexffmpeg/releases/download/7.1.1/ffmpeg-7.
 unzip -q ffmpeg.zip -d "$workdir"/ffmpeg
 # 解压 ffmpeg.zip 到 ffmpeg 目录
 mv "$workdir"/ffmpeg/*/bin/ffmpeg.exe  "$workdir"/python_standalone/Scripts/
-# 将 ffmpeg.exe 移动到 python_standalone/Scripts 目录
+echo "FFmpeg 安装完成"
 rm ffmpeg.zip
 # 删除 ffmpeg.zip 文件
 
 cd "$workdir"
 # 切换到工作目录
 du -hd1
-# 显示当前目录的磁盘使用情况，按目录深度为 1 显示
+echo "磁盘使用情况显示完成"

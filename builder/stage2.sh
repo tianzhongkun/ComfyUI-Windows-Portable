@@ -97,6 +97,13 @@ $gcs https://github.com/SLAPaper/ComfyUI-Image-Selector.git
 $gcs https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
 $gcs https://github.com/CY-CHENYUE/ComfyUI-Janus-Pro.git
 
+#汉化插件
+$gcs https://github.com/AIGODLIKE/AIGODLIKE-ComfyUI-Translation.git
+#人像大师
+$gcs https://github.com/florestefano1975/comfyui-portrait-master.git
+#comfyui-mixlab-nodes
+$gcs https://github.com/shadowcz007/comfyui-mixlab-nodes.git
+
 ################################################################################
 # 复制附件文件（包括启动脚本）
 cp -rf "$workdir"/attachments/. \
@@ -130,11 +137,57 @@ curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/mo
 curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/preprocessor_config.json \
     --create-dirs -o nsfw_detector/vit-base-nsfw-detector/preprocessor_config.json
 
+
+
+ # 下载 AnimateDiff 所需模型
+cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/models
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v14.ckpt \
+    --create-dirs -o animatediff_models/mm_sd_v14.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v15.ckpt \
+    --create-dirs -o animatediff_models/mm_sd_v15.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v15_v2.ckpt \
+    --create-dirs -o animatediff_models/mm_sd_v15_v2.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sdxl_v10_beta.ckpt \
+    --create-dirs -o animatediff_models/mm_sdxl_v10_beta.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_adapter.ckpt \
+    --create-dirs -o animatediff_models/v3_sd15_adapter.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_mm.ckpt \
+    --create-dirs -o animatediff_models/v3_sd15_mm.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_sparsectrl_rgb.ckpt \
+    --create-dirs -o animatediff_models/v3_sd15_sparsectrl_rgb.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_sparsectrl_scribble.ckpt \
+    --create-dirs -o animatediff_models/v3_sd15_sparsectrl_scribble.ckpt
+
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_PanLeft.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_PanLeft.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_PanRight.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_PanRight.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_RollingAnticlockwise.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_RollingAnticlockwise.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_RollingClockwise.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_RollingClockwise.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_TiltDown.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_TiltDown.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_TiltUp.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_TiltUp.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_ZoomIn.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_ZoomIn.ckpt
+curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_ZoomOut.ckpt \
+    --create-dirs -o animatediff_motion_lora/v2_lora_ZoomOut.ckpt
+
+
+    
+
 # 安装 Impact-Pack 和 Impact-Subpack 的依赖
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Subpack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
+
+
+# 安装 comfyui-mixlab-nodes 的依赖
+cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/comfyui-mixlab-nodes
+"$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.bat
 
 ################################################################################
 # 运行测试（仅使用 CPU），并让自定义节点下载所需模型
