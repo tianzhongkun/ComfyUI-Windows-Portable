@@ -32,12 +32,12 @@ mv python python_standalone
 echo "Python Standalone 重命名完成"
 
 # 运行 generate-pak5.sh 脚本
-"$workdir"/generate-pak5.sh
-echo "generate-pak5.sh 脚本执行完成"
+#"$workdir"/generate-pak5.sh
+#echo "generate-pak5.sh 脚本执行完成"
 
 # 运行 generate-pak7.sh 脚本
-"$workdir"/generate-pak7.sh
-echo "generate-pak7.sh 脚本执行完成"
+#"$workdir"/generate-pak7.sh
+#echo "generate-pak7.sh 脚本执行完成"
 
 
 
