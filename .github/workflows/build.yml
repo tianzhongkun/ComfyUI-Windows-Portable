@@ -21,16 +21,6 @@ jobs:
             bash stage2.sh
             bash stage3.sh
 
-        - name: Verify Artifacts
-          shell: bash
-          run: |
-            # 显示完整的文件树结构
-            cd $GITHUB_WORKSPACE
-            echo "=== 完整目录结构 ==="
-            ls -lahR
-            echo "=== 压缩包详情 ==="
-            7z l *.7z*
-            7z l *.zip*
 
         - name: Upload Release Assets
           uses: softprops/action-gh-release@v2
