@@ -31,14 +31,28 @@ echo "Python Standalone 解压完成"
 mv python python_standalone
 echo "Python Standalone 重命名完成"
 
+# 运行 generate-pak5.sh 脚本
+"$workdir"/builder/generate-pak5.sh
+echo "generate-pak5.sh 脚本执行完成"
+
+# 运行 generate-pak7.sh 脚本
+"$workdir"/builder/generate-pak7.sh
+echo "generate-pak7.sh 脚本执行完成"
+
+
+
 # PIP installs
 $pip_exe install --upgrade pip wheel setuptools
 echo "pip、wheel 和 setuptools 升级完成"
 
-$pip_exe install -r "$workdir"/pak.txt
-echo "pak2.txt 依赖安装完成"
+$pip_exe install -r "$workdir"/pak2.txt
+$pip_exe install -r "$workdir"/pak3.txt
+$pip_exe install -r "$workdir"/pak4.txt
 $pip_exe install -r "$workdir"/pak5.txt
-echo "pak3.txt 依赖安装完成"
+$pip_exe install -r "$workdir"/pak6.txt
+$pip_exe install -r "$workdir"/pak7.txt
+$pip_exe install -r "$workdir"/pak8.txt
+
 
 
 # Tweak for transparent-background. TODO: remove if upstream updated.
@@ -50,15 +64,12 @@ echo "albucore 和 albumentations 升级完成"
 $pip_exe install -r https://github.com/comfyanonymous/ComfyUI/raw/refs/heads/master/requirements.txt
 echo "ComfyUI 前端依赖安装完成"
 
-
-
 $pip_exe list
 # 列出所有已安装的 pip 包
 
 # 验证 PyTorch 安装
 $pip_exe list | grep torch  # 应显示 torch 2.3.0+cu121
 echo "PyTorch 安装验证完成"
-
 
 cd "$workdir"
 # 切换到工作目录
