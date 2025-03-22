@@ -48,12 +48,12 @@ pydub
 PyGithub
 pymatting
 pynvml
-pyobjc-framework-Quartz; platform-system=='Darwin'
+pyobjc-framework-Quartz
 PyOpenGL
 PyOpenGL-accelerate
 pyOpenSSL
 python-dateutil
-pywin32; platform-system=="Windows"
+pywin32
 pyyaml
 qrcode[pil]
 rembg[gpu]
@@ -67,7 +67,7 @@ sentencepiece
 simpleeval
 soundfile
 spandrel
-SpoutGL; platform-system=="Windows"
+SpoutGL
 stereoscopy[auto-align]
 svglib
 torchdiffeq
@@ -77,7 +77,6 @@ trimesh
 trimesh[easy]
 typer
 ultralytics
-ultralytics==8.3.40
 uv
 vnoise
 watchdog
