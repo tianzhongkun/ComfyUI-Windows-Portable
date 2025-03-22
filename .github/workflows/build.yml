@@ -6,36 +6,35 @@ on:
 jobs:
   build_upload:
     permissions:
-        contents: "write" # 允许写入仓库内容
-        packages: "write" # 允许写入包
-        pull-requests: "read" # 允许读取拉取请求
-    runs-on: windows-latest # 在最新的 Windows 环境中运行
+        contents: write
+        packages: write
+        pull-requests: read
+    runs-on: windows-latest
     steps:
-        - uses: actions/checkout@v4 # 检出当前仓库代码
+        - uses: actions/checkout@v4
 
         - name: Stage 1 Gathering Dependencies
-          shell: bash # 使用 Bash 作为脚本解释器
-          working-directory: builder # 设置工作目录为 builder 文件夹
-          run: bash stage1.sh # 运行 stage1.sh 脚本以收集依赖项
+          shell: bash
+          working-directory: builder
+          run: bash stage1.sh
 
         - name: Stage 2 Assembling Repositories
           shell: bash
           working-directory: builder
-          run: bash stage2.sh # 运行 stage2.sh 脚本以组装仓库
+          run: bash stage2.sh
 
         - name: Stage 3 Compressing Package
           shell: bash
           working-directory: builder
-          run: bash stage3.sh # 运行 stage3.sh 脚本以压缩打包
+          run: bash stage3.sh
 
         - name: Upload archive to release
-          uses: softprops/action-gh-release@v2 # 使用第三方 Action 上传文件到 GitHub Release
+          uses: softprops/action-gh-release@v2
           env:
-            # 这是 GitHub Actions 提供的默认令牌，用于认证
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-            files: |  # ✅ 跨平台路径写法
-            builder/*.7z
-            builder/*.zip
-          generate_release_notes: true  # 自动生成版本说明
-          tag_name: "build-${{ github.run_id }}"  # 动态生成唯一标签
+            files: |  # ✅ 正确缩进 (必须对齐)
+              builder/*.7z
+              builder/*.zip
+            generate_release_notes: true
+            tag_name: "build-${{ github.run_id }}"  # ✅ 已修复引号闭合
