@@ -186,7 +186,7 @@ cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Subpa
 
 # 安装 comfyui-mixlab-nodes 的依赖
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/comfyui-mixlab-nodes
-"$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.bat
+install.bat
 
 ################################################################################
 # 运行测试（仅使用 CPU），并让自定义节点下载所需模型
