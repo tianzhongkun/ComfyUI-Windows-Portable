@@ -24,20 +24,36 @@ https://github.com/pydn/ComfyUI-to-Python-Extension/raw/refs/heads/main/requirem
 https://github.com/yolain/ComfyUI-Easy-Use/raw/refs/heads/main/requirements.txt
 )
 
-for line in "${array[@]}";
-    do curl -w "\n" -sSL "${line}" >> pak7.txt
-done
+temp_file=$(mktemp)  # 创建临时文件
+exclude_file=$(mktemp)
 
-sed -i '/^#/d' pak7.txt
-sed -i 's/[[:space:]]*$//' pak7.txt
-sed -i 's/>=.*$//' pak7.txt
-sed -i 's/_/-/g' pak7.txt
-sed -i 's/; platform-system=="Windows"//' pak7.txt
+for url in "${array[@]}"; do
+    curl -sSLf "$url" | while IFS= read -r line; do
+        # 分步处理每行依赖项
+        processed=$(echo "$line" | sed -E '
+            s/#.*$//;                  # 移除行内注释
+            /^$/d;                     # 删除空行
+            s/[[:space:]]//g;          # 删除所有空格
+            s/;.*$//;                  # 关键！移除所有环境条件（分号后的内容）
+            s/[<>=~!]=.*$//;           # 移除版本号（如 >=1.0, ==2.3）
+            s/[<>].*$//;               # 处理单独 < 或 >（如 numpy<2）
+        ' | tr '_' '-' | tr '[:upper:]' '[:lower:]')  # 统一为小写+连字符格式
 
-sort -ufo pak7.txt pak7.txt
+        # 仅保留非空行
+        [[ -n "$processed" ]] && echo "$processed"
+    done
+done | sort -u >> "$temp_file"  # 直接去重
 
-# Remove duplicate items, compare to pak4.txt and pak5.txt
-grep -Fixv -f pak4.txt pak7.txt > temp.txt && mv temp.txt pak7.txt
-grep -Fixv -f pak5.txt pak7.txt > temp.txt && mv temp.txt pak7.txt
+# 合并 pak4.txt 和 pak5.txt 为排除列表
+cat pak4.txt pak5.txt 2>/dev/null | sed -E '
+    s/#.*$//; /^$/d; s/[[:space:]]//g;  # 与依赖项相同的标准化处理
+    s/;.*$//; s/[<>=~!]=.*$//; s/[<>].*$//;
+' | tr '_' '-' | tr '[:upper:]' '[:lower:]' | sort -u > "$exclude_file"
 
-echo "<pak7.txt> generated. Check before use."
+# 生成最终结果（从 temp_file 中排除 exclude_file 内容）
+grep -Fxv -f "$exclude_file" "$temp_file" > pak7.txt
+
+# 清理临时文件
+rm -f "$temp_file" "$exclude_file"
+
+echo "<pak7.txt> 生成完成，新增依赖项数量: $(wc -l < pak7.txt)"

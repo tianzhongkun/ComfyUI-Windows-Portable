@@ -26,18 +26,32 @@ https://github.com/melMass/comfy_mtb/raw/refs/heads/main/requirements.txt
 https://github.com/WASasquatch/was-node-suite-comfyui/raw/refs/heads/main/requirements.txt
 )
 
-for line in "${array[@]}";
-    do curl -w "\n" -sSL "${line}" >> pak5.txt
-done
+temp_file=$(mktemp)  # 创建临时文件
 
-sed -i '/^#/d' pak5.txt
-sed -i 's/[[:space:]]*$//' pak5.txt
-sed -i 's/>=.*$//' pak5.txt
-sed -i 's/_/-/g' pak5.txt
+for url in "${array[@]}"; do
+    curl -sSLf "$url" | while IFS= read -r line; do
+        # 分步处理每行依赖项
+        processed=$(echo "$line" | sed -E '
+            s/#.*$//;                  # 移除行内注释
+            /^$/d;                     # 删除空行
+            s/[[:space:]]//g;          # 删除所有空格
+            s/;.*$//;                  # 关键！移除所有环境条件（分号后的内容）
+            s/[<>=~!]=.*$//;           # 移除版本号（如 >=1.0, ==2.3）
+            s/[<>].*$//;               # 处理单独 < 或 >（如 numpy<2）
+        ' | tr '_' '-' | tr '[:upper:]' '[:lower:]')  # 统一为小写+连字符格式
 
-sort -ufo pak5.txt pak5.txt
+        # 仅保留非空行
+        [[ -n "$processed" ]] && echo "$processed"
+    done
+done | sort -u >> "$temp_file"  # 直接去重
 
-# Remove duplicate items, compare to pak4.txt
-grep -Fixv -f pak4.txt pak5.txt > temp.txt && mv temp.txt pak5.txt
+# 排除pak4.txt中的内容
+if [[ -f "pak4.txt" ]]; then
+    grep -Fivx -f pak4.txt "$temp_file" > pak5.txt
+else
+    mv "$temp_file" pak5.txt
+fi
 
-echo "<pak5.txt> generated. Check before use."
+rm -f "$temp_file"
+
+echo "生成完成，唯一依赖项数量: $(wc -l < pak5.txt)"
