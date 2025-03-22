@@ -29,11 +29,13 @@ jobs:
           run: bash stage3.sh # 运行 stage3.sh 脚本以压缩打包
 
         - name: Upload archive to release
-          uses: softprops/action-gh-release@v1 # 使用第三方 Action 上传文件到 GitHub Release
+          uses: softprops/action-gh-release@v2 # 使用第三方 Action 上传文件到 GitHub Release
           env:
             # 这是 GitHub Actions 提供的默认令牌，用于认证
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-            file: "builder/*.7z*;builder/*.zip*" # 指定要上传的文件路径模式
-            draft: true # 将 Release 设置为草稿状态
-            overwrite: true # 如果文件已存在，则覆盖
+            files: |  # ✅ 跨平台路径写法
+            builder/*.7z
+            builder/*.zip
+          generate_release_notes: true  # 自动生成版本说明
+          tag_name: "build-${{ github.run_id }}"  # 动态生成唯一标签
