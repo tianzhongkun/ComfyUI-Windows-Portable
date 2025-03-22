@@ -1,7 +1,7 @@
 name: "Build & Upload Package"
 
 on:
-  workflow_dispatch: # 手动触发工作流
+  workflow_dispatch:
 
 jobs:
   build_upload:
@@ -13,28 +13,32 @@ jobs:
     steps:
         - uses: actions/checkout@v4
 
-        - name: Stage 1 Gathering Dependencies
+        - name: Stage 1-3 Build Process
           shell: bash
           working-directory: builder
-          run: bash stage1.sh
+          run: |
+            bash stage1.sh
+            bash stage2.sh
+            bash stage3.sh
 
-        - name: Stage 2 Assembling Repositories
+        - name: Verify Artifacts
           shell: bash
-          working-directory: builder
-          run: bash stage2.sh
+          run: |
+            # 显示完整的文件树结构
+            cd $GITHUB_WORKSPACE
+            echo "=== 完整目录结构 ==="
+            ls -lahR
+            echo "=== 压缩包详情 ==="
+            7z l *.7z*
+            7z l *.zip*
 
-        - name: Stage 3 Compressing Package
-          shell: bash
-          working-directory: builder
-          run: bash stage3.sh
-
-        - name: Upload archive to release
+        - name: Upload Release Assets
           uses: softprops/action-gh-release@v2
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-            files: |  # ✅ 正确缩进 (必须对齐)
-              builder/*.7z
-              builder/*.zip
+            files: |
+              *.7z.*
+              *.zip.*
+            tag_name: "build-${{ github.run_id }}"
             generate_release_notes: true
-            tag_name: "build-${{ github.run_id }}"  # ✅ 已修复引号闭合

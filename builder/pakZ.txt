@@ -1,2 +1,0 @@
-# Make sure to use Numpy version 1
-# numpy==1.26.4

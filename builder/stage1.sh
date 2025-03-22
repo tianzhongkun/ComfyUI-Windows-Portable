@@ -35,20 +35,11 @@ echo "Python Standalone 重命名完成"
 $pip_exe install --upgrade pip wheel setuptools
 echo "pip、wheel 和 setuptools 升级完成"
 
-$pip_exe install -r "$workdir"/pak2.txt
+$pip_exe install -r "$workdir"/pak.txt
 echo "pak2.txt 依赖安装完成"
-$pip_exe install -r "$workdir"/pak3.txt
-echo "pak3.txt 依赖安装完成"
-$pip_exe install -r "$workdir"/pak4.txt
-echo "pak4.txt 依赖安装完成"
 $pip_exe install -r "$workdir"/pak5.txt
-echo "pak5.txt 依赖安装完成"
-$pip_exe install -r "$workdir"/pak6.txt
-echo "pak6.txt 依赖安装完成"
-$pip_exe install -r "$workdir"/pak7.txt
-echo "pak7.txt 依赖安装完成"
-$pip_exe install -r "$workdir"/pak8.txt
-echo "pak8.txt 依赖安装完成"
+echo "pak3.txt 依赖安装完成"
+
 
 # Tweak for transparent-background. TODO: remove if upstream updated.
 # https://github.com/plemeri/transparent-background/blob/f54975ce489af549dcfc4dc0a2d39e8f69a204fd/setup.py#L45
@@ -59,9 +50,7 @@ echo "albucore 和 albumentations 升级完成"
 $pip_exe install -r https://github.com/comfyanonymous/ComfyUI/raw/refs/heads/master/requirements.txt
 echo "ComfyUI 前端依赖安装完成"
 
-$pip_exe install -r "$workdir"/pakY.txt
-# 使用 pip 安装 pakY.txt 文件中列出的依赖
-$pip_exe install -r "$workdir"/pakZ.txt
+
 
 $pip_exe list
 # 列出所有已安装的 pip 包
