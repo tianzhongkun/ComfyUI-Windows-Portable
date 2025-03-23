@@ -3,6 +3,7 @@
 set -eux
 
 # 在 stage3.sh 顶部添加：
+workdir=$(pwd)
 output_dir="$workdir/builder"  # 确保输出到 builder 目录
 
 # 列出当前目录下的所有文件和目录，包括详细信息（权限、大小、修改时间等）以及符号链接标记
