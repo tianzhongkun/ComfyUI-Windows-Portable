@@ -2,6 +2,9 @@
 # 启用严格模式，确保脚本在遇到错误时立即停止执行，并输出调试信息
 set -eux
 
+# 在 stage3.sh 顶部添加：
+output_dir="$workdir/builder"  # 确保输出到 builder 目录
+
 # 列出当前目录下的所有文件和目录，包括详细信息（权限、大小、修改时间等）以及符号链接标记
 ls -lahF
 
@@ -23,7 +26,7 @@ mv "ComfyUI_Windows_portable/ComfyUI/models" "m_folder/ComfyUI_Windows_portable/
 git -C "ComfyUI_Windows_portable/ComfyUI" checkout "models"
 
 # 使用 7-Zip 对主目录进行高压缩率归档，采用 LZMA2 算法，分卷大小为 2140000000 字节（约 2GB），适用于 GitHub 的上传限制
-"C:\Program Files\7-Zip\7z.exe" a -t7z -m0=lzma2 -mx=7 -mfb=64 -md=128m -ms=on -mf=BCJ2 -v2140000000b ComfyUI_Windows_portable_cu126.7z ComfyUI_Windows_portable
+"C:\Program Files\7-Zip\7z.exe" a -t7z -m0=lzma2 -mx=7 -mfb=64 -md=128m -ms=on -mf=BCJ2 -v2140000000b "$output_dir/ComfyUI_Windows_portable_$(date +%Y%m%d).7z" ComfyUI_Windows_portable
 
 # 如果需要更快的压缩速度，可以注释掉上述命令并启用以下命令
 # 使用 ZIP 格式对主目录进行低压缩率归档，分卷大小为 2140000000 字节
@@ -32,7 +35,7 @@ git -C "ComfyUI_Windows_portable/ComfyUI" checkout "models"
 # 进入包含模型文件的临时目录
 cd m_folder
 # 使用 ZIP 格式对模型文件进行归档，分卷大小为 2140000000 字节
-"C:\Program Files\7-Zip\7z.exe" a -tzip -v2140000000b models.zip ComfyUI_Windows_portable
+"C:\Program Files\7-Zip\7z.exe" a -tzip -v2140000000b "$output_dir/models_$(date +%Y%m%d).zip" ComfyUI_Windows_portable
 # 将生成的压缩文件移动到上一级目录
 mv ./*.zip* ../
 # 返回到脚本初始工作目录
