@@ -1,4 +1,4 @@
-name: "Build & Upload Package"
+name: "编译和上传"
 
 on:
   workflow_dispatch:
@@ -8,42 +8,30 @@ jobs:
     permissions:
         contents: write
         packages: write
+        pull-requests: "read"
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v4
 
-        - name: Build Process
+        - name: 安装依赖环境
           shell: bash
           working-directory: builder
-          run: |
-            bash stage1.sh
-            bash stage2.sh
-            bash stage3.sh
+          run: bash stage1.sh
 
-        - name: Move Artifacts to Root
+        - name: 安装自定义节点
           shell: bash
-          run: |
-            # 将分卷文件移动到仓库根目录
-            mv builder/ComfyUI_Windows_portable*.7z.* . || true
-            mv builder/models*.zip.* . || true
+          working-directory: builder
+          run: bash stage2.sh
 
-        - name: Verify Artifacts
+        - name: 编译打包
           shell: bash
-          run: |
-            echo "=== 根目录文件 ==="
-            ls -lah *.7z.* *.zip.*
-            echo "=== 分卷校验 ==="
-            7z l ComfyUI_Windows_portable_cu126.7z.001
-            7z l models.zip.001
+          working-directory: builder
+          run: bash stage3.sh
 
-        - name: Upload Release Assets
-          uses: softprops/action-gh-release@v2
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: 上传文件发布
+          uses: svenstaro/upload-release-action@v2
           with:
-            files: |
-              ComfyUI_Windows_portable_cu126.7z.*
-              models.zip.*
-            tag_name: "v$(date +%Y%m%d)"
-            generate_release_notes: true
-            fail_on_unmatched_files: true
+                repo_token: ${{ secrets.GITHUB_TOKEN }}
+                file: "builder/*.7z*;builder/*.zip*"
+                tag: "latest"
+                overwrite: true
