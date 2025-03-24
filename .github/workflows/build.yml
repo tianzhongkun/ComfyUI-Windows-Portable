@@ -1,4 +1,4 @@
-name: "编译和上传"
+name: "Build & Upload Package"
 
 on:
   workflow_dispatch:
@@ -6,32 +6,36 @@ on:
 jobs:
   build_upload:
     permissions:
-        contents: write
-        packages: write
+        contents: "write"
+        packages: "write"
         pull-requests: "read"
     runs-on: windows-latest
     steps:
         - uses: actions/checkout@v4
 
-        - name: 安装依赖环境
+        - name: Stage 1 Gathering Dependencies
           shell: bash
           working-directory: builder
           run: bash stage1.sh
 
-        - name: 安装自定义节点
+        - name: Stage 2 Assembling Repositories
           shell: bash
           working-directory: builder
           run: bash stage2.sh
 
-        - name: 编译打包
+        - name: Stage 3 Compressing Package
           shell: bash
           working-directory: builder
           run: bash stage3.sh
 
-        - name: 上传文件发布
-          uses: svenstaro/upload-release-action@v2
+        - name: Upload archive to release
+          uses: xresloader/upload-to-github-release@v1
+          env:
+            # This is a always-on token when you run GitHub Actions
+            # You don't need to cofigure it
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
-                repo_token: ${{ secrets.GITHUB_TOKEN }}
-                file: "builder/*.7z*;builder/*.zip*"
-                tag: "latest"
-                overwrite: true
+            file: "builder/*.7z*;builder/*.zip*"
+            # always draft before release
+            draft: true
+            overwrite: true

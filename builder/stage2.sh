@@ -1,44 +1,48 @@
 #!/bin/bash
-set -eux  # 开启调试模式，显示每条命令并在出错时退出
+set -eux
 
-# 配置 Git 全局设置
+# Chores
 git config --global core.autocrlf true
-workdir=$(pwd)  # 获取当前工作目录
-gcs='git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules'  # 定义简化的 git clone 命令
-export PYTHONPYCACHEPREFIX="$workdir/pycache2"  # 设置 Python 缓存目录
-export PATH="$PATH:$workdir/ComfyUI_Windows_portable/python_standalone/Scripts"  # 添加 Python 脚本路径到环境变量
+workdir=$(pwd)
+gcs='git clone --depth=1 --no-tags --recurse-submodules --shallow-submodules'
+export PYTHONPYCACHEPREFIX="$workdir/pycache2"
+export PATH="$PATH:$workdir/ComfyUI_Windows_portable/python_standalone/Scripts"
 
-ls -lahF  # 列出当前目录的文件和文件夹
+ls -lahF
 
-# 配置 HuggingFace-Hub 和 Pytorch Hub 的缓存目录
+# Redirect HuggingFace-Hub model folder
 export HF_HUB_CACHE="$workdir/ComfyUI_Windows_portable/HuggingFaceHub"
 mkdir -p "${HF_HUB_CACHE}"
+# Redirect Pytorch Hub model folder
 export TORCH_HOME="$workdir/ComfyUI_Windows_portable/TorchHome"
 mkdir -p "${TORCH_HOME}"
 
-# 移动 python_standalone 到目标目录
+# Relocate python_standalone
+# This move is intentional. It will fast-fail if this breaks anything.
 mv  "$workdir"/python_standalone  "$workdir"/ComfyUI_Windows_portable/python_standalone
 
-# 下载并解压 MinGit（便携版 Git）
+# Add MinGit (Portable Git)
 curl -sSL https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/MinGit-2.49.0-64-bit.zip \
     -o MinGit.zip
 unzip -q MinGit.zip -d "$workdir"/ComfyUI_Windows_portable/MinGit
 rm MinGit.zip
 
 ################################################################################
-# 克隆 ComfyUI 主应用
+# ComfyUI main app
 git clone https://github.com/comfyanonymous/ComfyUI.git \
     "$workdir"/ComfyUI_Windows_portable/ComfyUI
+# Use latest stable version (has a release tag)
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI
-git reset --hard "$(git tag | grep -e '^v' | sort -V | tail -1)"  # 切换到最新稳定版本
-rm -vrf models  # 清空 models 文件夹
-mkdir models  # 重新创建 models 文件夹
+git reset --hard "$(git tag | grep -e '^v' | sort -V | tail -1)"
+# Clear models folder (will restore in the next stage)
+rm -vrf models
+mkdir models
 
-# 克隆自定义节点
+# Custom Nodes
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes
 $gcs https://github.com/ltdrdata/ComfyUI-Manager.git
 
-# 克隆其他节点分类（工作区、通用、控制、视频等）
+# Workspace
 $gcs https://github.com/crystian/ComfyUI-Crystools.git
 $gcs https://github.com/pydn/ComfyUI-to-Python-Extension.git
 
@@ -97,21 +101,15 @@ $gcs https://github.com/SLAPaper/ComfyUI-Image-Selector.git
 $gcs https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git
 $gcs https://github.com/CY-CHENYUE/ComfyUI-Janus-Pro.git
 
-#汉化插件
-$gcs https://github.com/AIGODLIKE/AIGODLIKE-ComfyUI-Translation.git
-
-#comfyui-mixlab-nodes
-$gcs https://github.com/shadowcz007/comfyui-mixlab-nodes.git
-
 ################################################################################
-# 复制附件文件（包括启动脚本）
+# Copy attachments files (incl. start scripts)
 cp -rf "$workdir"/attachments/. \
     "$workdir"/ComfyUI_Windows_portable/
 
-du -hd2 "$workdir"/ComfyUI_Windows_portable  # 显示目录大小
+du -hd2 "$workdir"/ComfyUI_Windows_portable
 
 ################################################################################
-# 下载 TAESD 模型，用于实时预览
+# TAESD model for image on-the-fly preview
 cd "$workdir"
 $gcs https://github.com/madebyollin/taesd.git
 mkdir -p "$workdir"/ComfyUI_Windows_portable/ComfyUI/models/vae_approx
@@ -119,7 +117,7 @@ cp taesd/*_decoder.pth \
     "$workdir"/ComfyUI_Windows_portable/ComfyUI/models/vae_approx/
 rm -rf taesd
 
-# 下载 ReActor 所需模型
+# Download models for ReActor
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/models
 curl -sSL https://github.com/sczhou/CodeFormer/releases/download/v0.1.0/codeformer.pth \
     --create-dirs -o facerestore_models/codeformer-v0.1.0.pth
@@ -136,65 +134,21 @@ curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/mo
 curl -sSL https://huggingface.co/AdamCodd/vit-base-nsfw-detector/resolve/main/preprocessor_config.json \
     --create-dirs -o nsfw_detector/vit-base-nsfw-detector/preprocessor_config.json
 
-
-
- # 下载 AnimateDiff 所需模型
-cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/models
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v14.ckpt \
-    --create-dirs -o animatediff_models/mm_sd_v14.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v15.ckpt \
-    --create-dirs -o animatediff_models/mm_sd_v15.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sd_v15_v2.ckpt \
-    --create-dirs -o animatediff_models/mm_sd_v15_v2.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/mm_sdxl_v10_beta.ckpt \
-    --create-dirs -o animatediff_models/mm_sdxl_v10_beta.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_adapter.ckpt \
-    --create-dirs -o animatediff_models/v3_sd15_adapter.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_mm.ckpt \
-    --create-dirs -o animatediff_models/v3_sd15_mm.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_sparsectrl_rgb.ckpt \
-    --create-dirs -o animatediff_models/v3_sd15_sparsectrl_rgb.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v3_sd15_sparsectrl_scribble.ckpt \
-    --create-dirs -o animatediff_models/v3_sd15_sparsectrl_scribble.ckpt
-
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_PanLeft.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_PanLeft.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_PanRight.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_PanRight.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_RollingAnticlockwise.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_RollingAnticlockwise.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_RollingClockwise.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_RollingClockwise.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_TiltDown.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_TiltDown.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_TiltUp.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_TiltUp.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_ZoomIn.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_ZoomIn.ckpt
-curl -sSL https://huggingface.co/guoyww/animatediff/blob/cd71ae134a27ec6008b968d6419952b0c0494cf2/v2_lora_ZoomOut.ckpt \
-    --create-dirs -o animatediff_motion_lora/v2_lora_ZoomOut.ckpt
-
-
-    
-
-# 安装 Impact-Pack 和 Impact-Subpack 的依赖
+# Download models for Impact-Pack & Impact-Subpack
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Impact-Subpack
 "$workdir"/ComfyUI_Windows_portable/python_standalone/python.exe -s -B install.py
 
-
-# 安装 comfyui-mixlab-nodes 的依赖
-cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/comfyui-mixlab-nodes
-./install.bat
-
 ################################################################################
-# 运行测试（仅使用 CPU），并让自定义节点下载所需模型
+# Run the test (CPU only), also let custom nodes download some models
 cd "$workdir"/ComfyUI_Windows_portable
 ./python_standalone/python.exe -s -B ComfyUI/main.py --quick-test-for-ci --cpu
 
 ################################################################################
-# 清理临时文件和日志
+# Clean up
+# DO NOT clean pymatting cache, they are nbi/nbc files for Numba, and won't be regenerated.
+#rm -rf "$workdir"/ComfyUI_Windows_portable/python_standalone/Lib/site-packages/pymatting
 rm -vf "$workdir"/ComfyUI_Windows_portable/*.log
 rm -vf "$workdir"/ComfyUI_Windows_portable/ComfyUI/user/*.log
 rm -vrf "$workdir"/ComfyUI_Windows_portable/ComfyUI/user/default/ComfyUI-Manager
@@ -206,9 +160,8 @@ rm -vf ./ComfyUI-Impact-Pack/impact-pack.ini
 rm -vf ./Jovimetrix/web/config.json
 rm -vf ./was-node-suite-comfyui/was_suite_config.json
 
-# 重置 ComfyUI-Manager 的状态
 cd "$workdir"/ComfyUI_Windows_portable/ComfyUI/custom_nodes/ComfyUI-Manager
 git reset --hard
 git clean -fxd
 
-cd "$workdir"  # 返回工作目录
+cd "$workdir"

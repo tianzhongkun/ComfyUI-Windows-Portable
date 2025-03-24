@@ -32,22 +32,12 @@ sed -i '/^#/d' pak7.txt
 sed -i 's/[[:space:]]*$//' pak7.txt
 sed -i 's/>=.*$//' pak7.txt
 sed -i 's/_/-/g' pak7.txt
-sed -i 's/[<>=~!]=.*$//' pak7.txt
-sed -i 's/[<>].*$//' pak7.txt
+sed -i 's/; platform-system=="Windows"//' pak7.txt
 
 sort -ufo pak7.txt pak7.txt
 
 # Remove duplicate items, compare to pak4.txt and pak5.txt
 grep -Fixv -f pak4.txt pak7.txt > temp.txt && mv temp.txt pak7.txt
 grep -Fixv -f pak5.txt pak7.txt > temp.txt && mv temp.txt pak7.txt
-
-# 额外清理步骤：移除无效的标记或格式
-sed -i '/sys-platform/d' pak7.txt
-sed -i '/platform-machine/d' pak7.txt
-sed -i '/^[[:space:]]*$/d' pak7.txt  # 移除空行
-
-# 验证生成的文件格式
-echo "Generated pak7.txt content:"
-cat pak5.txt
 
 echo "<pak7.txt> generated. Check before use."

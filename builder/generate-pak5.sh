@@ -34,21 +34,10 @@ sed -i '/^#/d' pak5.txt
 sed -i 's/[[:space:]]*$//' pak5.txt
 sed -i 's/>=.*$//' pak5.txt
 sed -i 's/_/-/g' pak5.txt
-sed -i 's/[<>=~!]=.*$//' pak5.txt
-sed -i 's/[<>].*$//' pak5.txt
 
 sort -ufo pak5.txt pak5.txt
 
 # Remove duplicate items, compare to pak4.txt
 grep -Fixv -f pak4.txt pak5.txt > temp.txt && mv temp.txt pak5.txt
-
-# 额外清理步骤：移除无效的标记或格式
-sed -i '/sys-platform/d' pak5.txt
-sed -i '/platform-machine/d' pak5.txt
-sed -i '/^[[:space:]]*$/d' pak5.txt  # 移除空行
-
-# 验证生成的文件格式
-echo "Generated pak5.txt content:"
-cat pak5.txt
 
 echo "<pak5.txt> generated. Check before use."
